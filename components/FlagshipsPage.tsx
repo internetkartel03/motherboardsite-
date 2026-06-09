@@ -148,8 +148,30 @@ function FlagshipFullscreen({ f, onBack }: { f: Flagship; onBack: () => void }) 
   }, []);
 
   return (
-    <div style={{ position: 'absolute', inset: 0, zIndex: 20, background: 'rgba(4,4,4,0.97)', opacity: mounted ? 1 : 0, transition: 'opacity 0.35s', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '28px 40px' }}>
+    <div style={{ position: 'absolute', inset: 0, zIndex: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.35s', display: 'flex', flexDirection: 'column' }}>
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          backgroundImage: `url("${f.image}")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundColor: '#040404',
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          background:
+            'linear-gradient(90deg, rgba(4,4,4,0.96) 0%, rgba(4,4,4,0.82) 42%, rgba(4,4,4,0.45) 100%)',
+        }}
+      />
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'clamp(20px,4vw,28px) clamp(16px,4vw,40px)' }}>
         <button
           onClick={onBack}
           style={{
@@ -186,7 +208,7 @@ function FlagshipFullscreen({ f, onBack }: { f: Flagship; onBack: () => void }) 
         </span>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', padding: '0 clamp(40px,8vw,120px)' }}>
+      <div style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', alignItems: 'center', padding: '0 clamp(20px,8vw,120px)' }}>
         <div style={{ maxWidth: '680px' }}>
           <p style={{
             fontFamily: "'Space Grotesk', sans-serif",
@@ -224,7 +246,7 @@ function FlagshipFullscreen({ f, onBack }: { f: Flagship; onBack: () => void }) 
         </div>
       </div>
 
-      <div style={{ padding: '28px 40px', display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ position: 'relative', zIndex: 1, padding: 'clamp(20px,4vw,28px) clamp(16px,4vw,40px)', display: 'flex', justifyContent: 'flex-end' }}>
         <button
           onMouseEnter={() => setHov(true)}
           onMouseLeave={() => setHov(false)}
@@ -320,7 +342,7 @@ export default function FlagshipsPage({ navigate }: FlagshipsPageProps) {
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
-      <VideoBackground src="/uploads/first_page_under_20mb.mp4" />
+      <VideoBackground src="/uploads/secondpage_under_20mb.mp4" />
       <Nav page="flagships" navigate={navigate} />
 
       <div style={{
