@@ -1,0 +1,186 @@
+// Shared components: VideoBackground, Nav, AccessModal
+const { useState, useEffect, useRef } = React;
+
+/* ── TOKENS ─────────────────────────────────────────────── */
+window.C = {
+  green:  '#00C87A',
+  red:    '#B83232',
+  white:  '#F2F2F2',
+  dim:    'rgba(242,242,242,0.45)',
+  dimmer: 'rgba(242,242,242,0.22)',
+  border: 'rgba(242,242,242,0.07)',
+  surface:'rgba(10,10,10,0.72)',
+};
+
+window.textShadow = '0 0 40px rgba(0,0,0,0.95), 0 2px 8px rgba(0,0,0,0.85)';
+window.glowShadow = '0 0 30px rgba(242,242,242,0.18), 0 0 60px rgba(242,242,242,0.07), 0 2px 4px rgba(0,0,0,0.95)';
+
+/* ── VIDEO BACKGROUND ────────────────────────────────────── */
+function VideoBackground({ src, overlay }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    v.muted = true;
+    v.play().catch(() => {});
+  }, [src]);
+
+  return (
+    <div style={{ position:'absolute', inset:0, zIndex:0, overflow:'hidden', background:'#060606' }}>
+      <video
+        ref={ref}
+        key={src}
+        src={src}
+        autoPlay
+        muted
+        loop
+        playsInline
+        style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}
+      />
+      {overlay && (
+        <div style={{ position:'absolute', inset:0, background: overlay }} />
+      )}
+    </div>
+  );
+}
+
+/* ── NAV ─────────────────────────────────────────────────── */
+function NavLink({ label, active, onClick }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: 'none', border: 'none', cursor: 'pointer', padding: '0',
+        fontFamily: "'Space Grotesk', sans-serif",
+        fontSize: '11px',
+        fontWeight: 500,
+        letterSpacing: '0.22em',
+        textTransform: 'uppercase',
+        color: active ? C.white : (hovered ? C.white : C.dim),
+        textShadow: window.textShadow,
+        transition: 'color 0.25s',
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function Nav({ page, navigate }) {
+  return (
+    <nav style={{
+      position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10,
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      padding: 'clamp(16px,3.5vw,28px) clamp(16px,4vw,40px)',
+    }}>
+      <NavLink label="FLAGSHIPS" active={page === 'flagships'} onClick={() => navigate('flagships')} />
+      <NavLink label="BETA ACCESS" active={page === 'beta'} onClick={() => navigate('beta')} />
+    </nav>
+  );
+}
+
+/* ── ACCESS MODAL ────────────────────────────────────────── */
+function AccessModal({ onSubmit, onClose }) {
+  const [email, setEmail] = useState('');
+  const [name, setName]   = useState('');
+  const [err, setErr]     = useState('');
+  const [hover, setHover] = useState(false);
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+      setErr('A valid email is required.');
+      return;
+    }
+    onSubmit(email.trim(), name.trim());
+  };
+
+  const inputStyle = {
+    width: '100%',
+    background: 'rgba(255,255,255,0.04)',
+    border: `1px solid ${C.border}`,
+    borderRadius: '2px',
+    padding: '13px 16px',
+    fontFamily: "'Space Grotesk', sans-serif",
+    fontSize: '13px',
+    fontWeight: 400,
+    color: C.white,
+    outline: 'none',
+    letterSpacing: '0.04em',
+    transition: 'border-color 0.2s',
+  };
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 100,
+        background: 'rgba(0,0,0,0.82)',
+        backdropFilter: 'blur(10px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div style={{
+        width: '100%', maxWidth: '400px',
+        padding: '56px 48px',
+        position: 'relative',
+      }}>
+        <p style={{
+          fontFamily: "'Space Grotesk', sans-serif",
+          fontSize: '10px', fontWeight: 500,
+          letterSpacing: '0.3em', textTransform: 'uppercase',
+          color: C.dimmer, marginBottom: '40px',
+        }}>REQUEST ACCESS</p>
+
+        <form onSubmit={submit} style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
+          <input
+            type="email"
+            placeholder="Email address"
+            value={email}
+            onChange={e => { setEmail(e.target.value); setErr(''); }}
+            style={inputStyle}
+            onFocus={e => e.target.style.borderColor = 'rgba(242,242,242,0.2)'}
+            onBlur={e  => e.target.style.borderColor = C.border}
+          />
+          <input
+            type="text"
+            placeholder="Name (optional)"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            style={inputStyle}
+            onFocus={e => e.target.style.borderColor = 'rgba(242,242,242,0.2)'}
+            onBlur={e  => e.target.style.borderColor = C.border}
+          />
+
+          {err && (
+            <p style={{ fontFamily:"'Space Grotesk',sans-serif", fontSize:'11px', color: C.red, letterSpacing:'0.05em' }}>{err}</p>
+          )}
+
+          <button
+            type="submit"
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
+            style={{
+              marginTop: '8px',
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: '0', alignSelf: 'flex-start',
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontSize: '11px', fontWeight: 600,
+              letterSpacing: '0.25em', textTransform: 'uppercase',
+              color: hover ? C.green : C.white,
+              textShadow: hover ? `0 0 20px rgba(0,200,122,0.4)` : 'none',
+              transition: 'color 0.25s, text-shadow 0.25s',
+            }}
+          >
+            REQUEST ACCESS →
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { VideoBackground, Nav, AccessModal });
